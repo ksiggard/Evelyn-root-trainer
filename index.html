@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#4f46e5" />
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png">
+    <title>Evelyn's Root Trainer</title>
+    <style>
+      /* Prevent pull-to-refresh overscroll glow on iOS PWA */
+      html, body, #root { height: 100%; }
+      body { margin: 0; }
+    </style>
+    <script type="module" src="/src/main.tsx"></script>
+  </head>
+  <body class="min-h-screen bg-gradient-to-b from-purple-50 via-indigo-50 to-teal-50">
+    <div id="root"></div>
+  </body>
+</html>
