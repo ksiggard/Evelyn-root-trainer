@@ -3,74 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
-
-type Mode = 'square' | 'cube';
-type InputType = 'typed' | 'mc';
-type RoundPreset = 5 | 10 | 15 | 'open';
-
-type SessionConfig = { mode: Mode; inputType: InputType; roundLength: RoundPreset; };
-type QA = { prompt: number; root: number; options?: number[]; };
-type Result = { qa: QA; answer: number | string; correct: boolean; ms: number; };
-
-const ROOT_MIN = 1, ROOT_MAX = 100;
-
-const cubeLastDigitMap: Record<string, number> = { '0':0,'1':1,'2':8,'3':7,'4':4,'5':5,'6':6,'7':3,'8':2,'9':9 };
-const squareLookup = Array.from({length: ROOT_MAX}, (_,i)=>({ n:i+1, sq:(i+1)*(i+1) }));
-
-const choice = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
-const shuffle = <T,>(arr: T[]) => { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
-const clamp = (n:number,min:number,max:number)=>Math.max(min,Math.min(max,n));
-const now = ()=> performance.now();
-const avg = (nums:number[]) => nums.length ? nums.reduce((a,b)=>a+b,0)/nums.length : 0;
-const msToSeconds = (ms:number)=> Math.round(ms)/1000;
-const rootsExcept = (exclude:Set<number>)=>{ const res:number[]=[]; for(let n=ROOT_MIN;n<=ROOT_MAX;n++) if(!exclude.has(n)) res.push(n); return res; };
-
-function generateQA(mode: Mode, usedRoots = new Set<number>()): QA {
-  const available:number[]=[]; for(let n=ROOT_MIN;n<=ROOT_MAX;n++) if(!usedRoots.has(n)) available.push(n);
-  const root = choice(available.length ? available : Array.from({length:ROOT_MAX},(_,i)=>i+1));
-  const prompt = mode==='square' ? root*root : root*root*root; return { prompt, root };
-}
-
-function buildMCOptions(correctRoot:number, farAsCorrect:boolean = Math.random()<0.2): number[] {
-  const exclude = new Set<number>([correctRoot]);
-
-  const getNear = (center:number, count:number, excludeSet:Set<number>) => {
-    const candidates:number[]=[];
-    for (let d=1; d<=3 && candidates.length<count*2; d++) {
-      const a=center-d, b=center+d;
-      if (a>=ROOT_MIN && !excludeSet.has(a)) candidates.push(a);
-      if (b<=ROOT_MAX && !excludeSet.has(b)) candidates.push(b);
-    }
-    const fill = rootsExcept(excludeSet).filter(n=>Math.abs(n-center)<=5);
-    const pool = shuffle([...new Set([...candidates,...fill])]);
-    const picked:number[]=[];
-    for (const n of pool) { if (picked.length>=count) break; picked.push(n); excludeSet.add(n); }
-    return picked;
-  };
-  const getFar = (center:number, excludeSet:Set<number>) => {
-    const pool = rootsExcept(excludeSet).filter(n=>Math.abs(n-center)>=10);
-    return choice(pool.length?pool:rootsExcept(excludeSet));
-  };
-
-  let options:number[]=[];
-  if (farAsCorrect) {
-    const clusterCenterCandidates = rootsExcept(exclude);
-    const clusterCenter = choice(clusterCenterCandidates.filter(n=>Math.abs(n-correctRoot)>=8));
-    const near1 = getNear(clusterCenter, 2, exclude);
-    const near2 = getNear(clusterCenter, 1, exclude);
-    const cluster = [...near1, ...near2];
-    while (cluster.length<3) { const f = getNear(clusterCenter,1,exclude); if(!f.length) break; cluster.push(...f); }
-    options = shuffle([correctRoot, ...cluster.slice(0,3)]);
-  } else {
-    const near = getNear(correctRoot, 2, exclude);
-    const far = getFar(correctRoot, exclude);
-    options = shuffle([correctRoot, ...near, far]).slice(0,4);
-  }
-
-  const uniq = Array.from(new Set(options));
-  while (uniq.length<4) { const filler = choice(rootsExcept(new Set(uniq))); uniq.push(filler); }
-  return shuffle(uniq.slice(0,4));
-}
+import {
+  type QA, type Result, type RoundPreset, type SessionConfig,
+  ROOT_MIN, ROOT_MAX, cubeLastDigitMap, squareLookup, clamp, avg, msToSeconds, generateQA, buildMCOptions,
+} from './roots/logic';
+import { APP_VERSION } from './version';
 
 function Donut({ correct, wrong, remaining }:{correct:number; wrong:number; remaining:number}) {
   const total = correct + wrong + remaining;
@@ -190,12 +127,12 @@ export default function App() {
     <div className="min-h-screen w-full bg-gradient-to-b from-purple-50 via-indigo-50 to-teal-50 text-slate-800">
       <div className="max-w-md mx-auto p-4 pb-24">
         <header className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-indigo-600 to-teal-600 bg-clip-text text-transparent">Evelyn's Root Trainer</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-indigo-600 to-teal-600 bg-clip-text text-transparent">Evelyn's Math Trainer</h1>
           <div className="flex items-center gap-2">
             {started && (
               <button className="px-3 py-1.5 rounded-xl border text-sm" onClick={()=>{ setShowReport(false); setStarted(false); }}>Back to setup</button>
             )}
-            <div className="text-xs text-slate-500">v0.3</div>
+            <div className="text-xs text-slate-500">v{APP_VERSION}</div>
           </div>
         </header>
 

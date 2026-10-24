@@ -1,5 +1,5 @@
-# Evelyn's Root Trainer (PWA)
-A small Progressive Web App that drills perfect square and cube roots for 1–100.
+# Evelyn's Math Trainer (PWA)
+A small Progressive Web App that drills perfect square and cube roots for 1–100, and reading and writing 8-bit ASCII binary.
 
 ## Quick Start (local)
 1) Install Node.js (v18+ recommended): https://nodejs.org
@@ -27,6 +27,11 @@ A small Progressive Web App that drills perfect square and cube roots for 1–10
 3) Tap **Add to Home Screen**.
 4) Launch from the home screen icon. It opens full-screen like an app.
 5) The app works offline after the first load.
+
+## Releasing
+1) Bump `version` in `package.json` (it's shown in the app header).
+2) Push to `main`; Netlify deploys automatically.
+3) On the phone, close the app fully and reopen it, then check the version in the header.
 
 ## Notes
 - All settings are saved locally in the browser.
