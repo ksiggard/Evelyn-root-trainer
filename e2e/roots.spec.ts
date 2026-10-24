@@ -11,6 +11,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
+  await page.getByTestId('home.roots').click();
 });
 
 test('shows the app title and version', async ({ page }) => {
