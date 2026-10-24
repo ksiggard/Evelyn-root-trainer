@@ -1,6 +1,6 @@
 # Plan — Add Binary Training to Evelyn's Root Trainer (PWA)
 
-Status: **Approved 2026-10-24. Phase 1 in progress.**
+Status: **Done (v0.5.0, 2026-10-24).** Phases 1–2 shipped and confirmed working on her phone; Phase 3 (polish) skipped by choice and can be picked up later.
 
 **Your decisions:** the app is renamed **Evelyn's Math Trainer**; Bits → Char is **typed only**; every phase deploys **straight to production** (push to `main` → Netlify) with a **version bump shown in the app**, and you test the live app.
 
